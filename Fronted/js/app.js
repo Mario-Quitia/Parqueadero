@@ -33,6 +33,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const tablaEspaciosBody = document.querySelector("#tabla-espacios tbody");
   const gridEspacios = document.getElementById("grid-espacios");
+  const btnEliminarSeleccionados = document.getElementById("btn-eliminar-seleccionados");
+  const contadorSeleccionados = document.getElementById("contador-seleccionados");
+    let espaciosSeleccionados = new Set();
 
 
 
@@ -392,10 +395,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-
-
-
-
 // Función auxiliar para obtener el ícono según tipo
 function obtenerIconoPorTipo(tipo) {
   switch (tipo.toLowerCase()) {
@@ -407,46 +406,67 @@ function obtenerIconoPorTipo(tipo) {
 }
 
 // Renderiza espacios en el contenedor visual principal
-
 function renderizarEspaciosVisuales(espacios) {
   const grid = document.getElementById("grid-espacios");
+  if (!grid) {
+    console.error("No se encontró el contenedor grid-espacios");
+    return;
+  }
+
   grid.innerHTML = "";
 
   espacios.forEach(e => {
-    const btn = document.createElement("button");
-    btn.classList.add("espacio-btn");
+    const div = document.createElement("div");
+    div.classList.add("espacio");
+    div.classList.add(e.estado.toLowerCase() === "libre" ? "libre" : "ocupado");
 
-    const estado = e.estado.toLowerCase() === "ocupado" ? "ocupado" : "libre";
-    btn.classList.add(estado);
+    const icono = obtenerIconoPorTipo(e.tipo);
 
-    let icono = "❓";
-    switch (e.tipo.toLowerCase()) {
-      case "carro": icono = "🚗"; break;
-      case "moto": icono = "🏍️"; break;
-      case "bicicleta": icono = "🚲"; break;
-    }
-
-    btn.title = `Espacio ${e.numero} - ${e.tipo} - ${e.estado}`;
-    btn.innerHTML = `
-      <div>${icono}</div>
+    div.title = `Espacio ${e.numero} - ${e.tipo} - ${e.estado}`;
+    div.innerHTML = `
+      <span class="icono">${icono}</span>
       <small>${e.numero}</small>
     `;
 
-    grid.appendChild(btn);
+    grid.appendChild(div);
   });
 }
 
-
 // Lista espacios y los renderiza visualmente
-async function listarEspacios() {
-  try {
-    const res = await fetch("http://localhost:8081/api/espacios-parqueo/listar");
-    const espacios = await res.json();
-    renderizarEspaciosVisuales(espacios);
-  } catch (error) {
-    console.error("Error al listar espacios:", error);
-  }
+function cargarEspacios() {
+  fetch("http://localhost:8081/api/espacios-parqueo/listar")
+    .then(res => res.json())
+    .then(data => {
+      console.log("🔍 Espacios recibidos del backend:", data);
+      gridEspacios.innerHTML = "";
+      espaciosSeleccionados.clear();
+      actualizarEstadoEliminar();
+      data.forEach(e => gridEspacios.appendChild(renderizarEspacioConCheckbox(e)));
+    })
+    .catch(err => console.error("Error al listar espacios:", err));
 }
+
+// 🗑️ Evento: eliminar seleccionados
+btnEliminarSeleccionados.addEventListener("click", async () => {
+  if (espaciosSeleccionados.size === 0) return;
+
+  if (!confirm(`¿Eliminar ${espaciosSeleccionados.size} espacio(s)?`)) return;
+
+  try {
+    const res = await fetch("http://localhost:8081/api/espacios-parqueo/eliminar-multiples", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ids: Array.from(espaciosSeleccionados) })
+    });
+
+    if (!res.ok) throw new Error(await res.text());
+
+    alert("Espacios eliminados correctamente");
+    cargarEspacios(); // Recargar visualmente
+  } catch (err) {
+    alert("Error al eliminar espacios: " + err.message);
+  }
+});
 
 // Enviar formulario para generar espacios
 const formGenerarEspacios = document.getElementById("form-generar-espacios");
@@ -474,22 +494,58 @@ formGenerarEspacios.addEventListener("submit", async (e) => {
     const mensaje = await res.text();
     alert(mensaje);
     formGenerarEspacios.reset();
-    await listarEspacios();
+    await cargarEspacios(); // ✅ Corrección aquí
   } catch (err) {
     console.error("Error al generar espacios: " + err.message);
   }
 });
 
+function actualizarEstadoEliminar() {
+  const count = espaciosSeleccionados.size;
+  contadorSeleccionados.textContent = `${count} seleccionado${count !== 1 ? 's' : ''}`;
+  btnEliminarSeleccionados.disabled = count === 0;
+}
 
+// Renderiza espacio con checkbox
+function renderizarEspacioConCheckbox(espacio) {
+  const espacioContainer = document.createElement("div");
+  espacioContainer.className = "espacio-item";
 
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "espacio-checkbox";
+  checkbox.dataset.id = espacio.id;
 
+  checkbox.addEventListener("change", function () {
+    if (this.checked) {
+      espaciosSeleccionados.add(espacio.id);
+    } else {
+      espaciosSeleccionados.delete(espacio.id);
+    }
+    actualizarEstadoEliminar();
+  });
+
+  const btn = document.createElement("button");
+  btn.className = `espacio-btn ${espacio.estado.toLowerCase() === "libre" ? "libre" : "ocupado"}`;
+
+  const icono = obtenerIconoPorTipo(espacio.tipo); // ✅ Siempre usamos la misma lógica
+  btn.innerHTML = `
+    <span class="icono">${icono}</span>
+    <small>${espacio.numero}</small>
+  `;
+
+  espacioContainer.appendChild(checkbox);
+  espacioContainer.appendChild(btn);
+
+  return espacioContainer;
+}
 
 
 
   // --- Inicialización ---
 fetchVehiculos();
 fetchTarifas();
-listarEspacios(); // Esta es la correcta
+cargarEspacios();
 
 });
 

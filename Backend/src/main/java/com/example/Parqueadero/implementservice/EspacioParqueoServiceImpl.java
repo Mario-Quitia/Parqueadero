@@ -3,6 +3,7 @@ package com.example.Parqueadero.implementservice;
 import com.example.Parqueadero.entities.EspacioParqueo;
 import com.example.Parqueadero.repository.EspacioParqueoRepository;
 import com.example.Parqueadero.service.EspacioParqueoService;
+import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,16 @@ public void generarEspacios(int cantidad, String tipo) {
         }
     }
 }
+
+  
+   @Override
+    @Transactional
+    public void eliminarMultiples(List<Long> ids) {
+        repository.deleteAllById(ids);
+    }
+
+
+
 
 }
 

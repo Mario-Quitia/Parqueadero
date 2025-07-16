@@ -17,6 +17,7 @@
         <li><a href="#" data-section="listado">Listado</a></li>
         <li><a href="#" data-section="tarifas">Tarifas</a></li>
         <li><a href="#" data-section="espacios">Espacios</a></li>
+          <li><a href="#" data-section="pagos">Pagos</a></li>
       </ul>
     </aside>
 
@@ -181,12 +182,39 @@
 
   <hr>
 
+  <div class="actions-bar">
+    <button id="btn-eliminar-seleccionados" class="btn-danger" disabled>
+      🗑️ Eliminar seleccionados
+    </button>
+    <span id="contador-seleccionados">0 seleccionados</span>
+  </div>
+
   <h3>📍 Espacios Disponibles</h3>
 
   <div id="grid-espacios" class="espacios-grid">
     <!-- Espacios se insertan aquí con JS -->
   </div>
 </section>
+
+<section id="pagos" class="section-container">
+  <h2>📄 Pagos Realizados</h2>
+  <table id="tabla-pagos">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Registro</th>
+        <th>Monto</th>
+        <th>Método</th>
+        <th>Fecha</th>
+        <th>Usuario</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <p>Total pagos: <span id="total-pagos">0</span></p>
+</section>
+
 
     </main>
   </div>

@@ -7,10 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/espacios-parqueo")
-@CrossOrigin(origins = "*") // Si estás haciendo pruebas desde Postman o un frontend
+@CrossOrigin(origins = "*")
 public class EspacioParqueoController {
 
     private final EspacioParqueoService espacioService;
@@ -56,11 +57,9 @@ public class EspacioParqueoController {
         return ResponseEntity.noContent().build();
     }
 
-    // ✅ Generar múltiples espacios automáticamente
+    // Generar múltiples espacios automáticamente
     @PostMapping("/generar")
-    public ResponseEntity<String> generarEspacios(
-            @RequestParam int cantidad,
-            @RequestParam String tipo) {
+    public ResponseEntity<String> generarEspacios(@RequestParam int cantidad, @RequestParam String tipo) {
         if (cantidad <= 0) {
             return ResponseEntity.badRequest().body("La cantidad debe ser mayor que cero.");
         }
@@ -68,5 +67,24 @@ public class EspacioParqueoController {
         espacioService.generarEspacios(cantidad, tipo);
         return ResponseEntity.ok("Se generaron " + cantidad + " espacios del tipo '" + tipo.toUpperCase() + "' correctamente.");
     }
+
+    @DeleteMapping("/eliminar-multiples")
+public ResponseEntity<Void> eliminarMultiples(@RequestBody Map<String, List<Long>> payload) {
+    List<Long> ids = payload.get("ids");
+    
+    if (ids == null || ids.isEmpty()) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    espacioService.eliminarMultiples(ids);
+    return ResponseEntity.noContent().build();
 }
+    
+    
+    
+    
+    
+   
+}
+
 

@@ -20,4 +20,14 @@ public class SeguridadConfig {
 
         return http.build();
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }

@@ -215,3 +215,80 @@ input, select {
   background-color: #fee2e2;
   color: #dc2626;
 }
+.actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.btn-danger:disabled {
+  background-color: #fca5a5;
+  cursor: not-allowed;
+}
+
+#contador-seleccionados {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.espacio-item {
+  position: relative;
+}
+
+.espacio-checkbox {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.espacio-btn.checked {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+#tabla-pagos {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+#tabla-pagos th, #tabla-pagos td {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+#tabla-pagos th {
+  background-color: #f0f0f0;
+}
+
+.btn-eliminar-pago {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+}

@@ -26,6 +26,8 @@ public interface EspacioParqueoRepository extends JpaRepository<EspacioParqueo, 
     
      List<EspacioParqueo> findByTipoOrderByNumeroAsc(String tipo);
     
-    
+   
+
+        
     
 }

@@ -13,4 +13,6 @@ public interface EspacioParqueoService {
     EspacioParqueo actualizar(Long id, EspacioParqueo espacioActualizado);
     void eliminar(Long id);
     void generarEspacios(int cantidad, String tipo);
+    void eliminarMultiples(List<Long> ids);
+
 }
