@@ -1,11 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Dashboard Parqueadero</title>
   <link rel="stylesheet" href="/style/styles.css">
   <script defer src="/js/app.js"></script>
+  <script defer src="/js/registro-parqueo.js"></script>
+
 </head>
+
 <body>
 
   <div class="container">
@@ -17,7 +21,11 @@
         <li><a href="#" data-section="listado">Listado</a></li>
         <li><a href="#" data-section="tarifas">Tarifas</a></li>
         <li><a href="#" data-section="espacios">Espacios</a></li>
-          <li><a href="#" data-section="pagos">Pagos</a></li>
+        <li><a href="#" data-section="pagos">Pagos</a></li>
+        <li><a href="#" data-section="usuarios">Usuarios</a></li>
+        <li><a href="#" data-section="registro-parqueo">Registro de Parqueo</a></li>
+
+
       </ul>
     </aside>
 
@@ -86,189 +94,270 @@
       </section>
 
       <!-- Tarifas -->
-    <section id="tarifas" class="section-container">
-  <h2>Registrar Tarifa</h2>
-  <form id="tarifa-form">
-    <div class="form-group">
-      <label for="tipoVehiculo">Tipo de Vehículo:</label>
-      <select id="tipoVehiculo" required>
-        <option value="">-- Selecciona un tipo --</option>
-        <option value="carro">Carro</option>
-        <option value="moto">Moto</option>
-        <option value="bicicleta">Bicicleta</option>
-        <option value="otro">Otro</option>
-      </select>
-    </div>
+      <section id="tarifas" class="section-container">
+        <h2>Registrar Tarifa</h2>
+        <form id="tarifa-form">
+          <div class="form-group">
+            <label for="tipoVehiculo">Tipo de Vehículo:</label>
+            <select id="tipoVehiculo" required>
+              <option value="">-- Selecciona un tipo --</option>
+              <option value="carro">Carro</option>
+              <option value="moto">Moto</option>
+              <option value="bicicleta">Bicicleta</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
 
-    <div class="form-group">
-      <label for="tipoTiempo">Tipo de Tiempo:</label>
-      <select id="tipoTiempo" required>
-        <option value="">-- Selecciona tiempo --</option>
-        <option value="HORA">Hora</option>
-        <option value="DIA">Día</option>
-        <option value="MES">Mes</option>
-      </select>
-    </div>
+          <div class="form-group">
+            <label for="tipoTiempo">Tipo de Tiempo:</label>
+            <select id="tipoTiempo" required>
+              <option value="">-- Selecciona tiempo --</option>
+              <option value="HORA">Hora</option>
+              <option value="DIA">Día</option>
+              <option value="MES">Mes</option>
+            </select>
+          </div>
 
-    <div class="form-group">
-      <label for="valorHora">Valor por Hora:</label>
-      <input type="number" id="valorHora" step="0.01" min="0" required>
-    </div>
+          <div class="form-group">
+            <label for="valorHora">Valor por Hora:</label>
+            <input type="number" id="valorHora" step="0.01" min="0" required>
+          </div>
 
-    <div class="form-group">
-      <label for="valor">Valor Total:</label>
-      <input type="number" id="valor" step="0.01" min="0" required>
-    </div>
+          <div class="form-group">
+            <label for="valor">Valor Total:</label>
+            <input type="number" id="valor" step="0.01" min="0" required>
+          </div>
 
-    <div class="form-group">
-      <label for="valorFraccion">Valor Fracción:</label>
-      <input type="number" id="valorFraccion" step="0.01" min="0">
-    </div>
+          <div class="form-group">
+            <label for="valorFraccion">Valor Fracción:</label>
+            <input type="number" id="valorFraccion" step="0.01" min="0">
+          </div>
 
-    <div class="form-group">
-      <label for="activo">¿Activo?</label>
-      <input type="checkbox" id="activo" checked>
-    </div>
+          <div class="form-group">
+            <label for="activo">¿Activo?</label>
+            <input type="checkbox" id="activo" checked>
+          </div>
 
-    <button type="submit" class="btn-submit">💲 Guardar Tarifa</button>
-  </form>
+          <button type="submit" class="btn-submit">💲 Guardar Tarifa</button>
+        </form>
 
-  <hr>
+        <hr>
 
-  <h3>Listado de Tarifas</h3>
-  <table id="tabla-tarifas">
-    <thead>
-      <tr>
-        <th>Tipo Vehículo</th>
-        <th>Tipo Tiempo</th>
-        <th>Valor Hora</th>
-        <th>Valor</th>
-        <th>Fracción</th>
-        <th>Activo</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Tarifas serán insertadas aquí -->
-    </tbody>
-  </table>
-  <p>Total tarifas: <span id="total-tarifas">0</span></p>
-</section>
+        <h3>Listado de Tarifas</h3>
+        <table id="tabla-tarifas">
+          <thead>
+            <tr>
+              <th>Tipo Vehículo</th>
+              <th>Tipo Tiempo</th>
+              <th>Valor Hora</th>
+              <th>Valor</th>
+              <th>Fracción</th>
+              <th>Activo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Tarifas serán insertadas aquí -->
+          </tbody>
+        </table>
+        <p>Total tarifas: <span id="total-tarifas">0</span></p>
+      </section>
 
 
       <!-- Espacios -->
 
-<section id="espacios" class="section-container">
-  <h2 class="titulo">🎯 Panel de Control - Espacios de Parqueo</h2>
+      <section id="espacios" class="section-container">
+        <h2 class="titulo">🎯 Panel de Control - Espacios de Parqueo</h2>
 
-  <form id="form-generar-espacios" class="formulario">
-    <div class="form-group">
-      <label for="cantidad">Cantidad:</label>
-      <input type="number" id="cantidad" min="1" required>
-    </div>
+        <form id="form-generar-espacios" class="formulario">
+          <div class="form-group">
+            <label for="cantidad">Cantidad:</label>
+            <input type="number" id="cantidad" min="1" required>
+          </div>
 
-    <div class="form-group">
-      <label for="tipoEspacio">Tipo:</label>
-      <select id="tipoEspacio" required>
-        <option value="">-- Selecciona tipo --</option>
-        <option value="carro">🚗 Carro</option>
-        <option value="moto">🏍️ Moto</option>
-        <option value="bicicleta">🚲 Bicicleta</option>
-      </select>
-    </div>
+          <div class="form-group">
+            <label for="tipoEspacio">Tipo:</label>
+            <select id="tipoEspacio" required>
+              <option value="">-- Selecciona tipo --</option>
+              <option value="carro">🚗 Carro</option>
+              <option value="moto">🏍️ Moto</option>
+              <option value="bicicleta">🚲 Bicicleta</option>
+            </select>
+          </div>
 
-    <button type="submit" class="btn-submit">➕ Generar</button>
-  </form>
+          <button type="submit" class="btn-submit">➕ Generar</button>
+        </form>
 
-  <hr>
+        <hr>
 
-  <div class="actions-bar">
-    <button id="btn-eliminar-seleccionados" class="btn-danger" disabled>
-      🗑️ Eliminar seleccionados
-    </button>
-    <span id="contador-seleccionados">0 seleccionados</span>
-  </div>
+        <div class="actions-bar">
+          <button id="btn-eliminar-seleccionados" class="btn-danger" disabled>
+            🗑️ Eliminar seleccionados
+          </button>
+          <span id="contador-seleccionados">0 seleccionados</span>
+        </div>
 
-  <h3>📍 Espacios Disponibles</h3>
+        <h3>📍 Espacios Disponibles</h3>
 
-  <div id="grid-espacios" class="espacios-grid">
-    <!-- Espacios se insertan aquí con JS -->
-  </div>
+        <div id="grid-espacios" class="espacios-grid">
+          <!-- Espacios se insertan aquí con JS -->
+        </div>
+      </section>
+
+      <section id="pagos" class="section-container">
+        <h2>💳 Gestión de Pagos</h2>
+
+        <form id="form-pago">
+          <label>ID Registro: <input type="number" id="idRegistro" required></label>
+          <label>ID Usuario: <input type="number" id="idUsuario" required></label>
+          <label>Método de Pago:
+            <select id="metodoPago" required>
+              <option value="">-- Selecciona --</option>
+              <option value="Efectivo">Efectivo</option>
+              <option value="Tarjeta">Tarjeta</option>
+              <option value="Transferencia">Transferencia</option>
+            </select>
+          </label>
+          <button type="submit">Realizar Pago</button>
+        </form>
+
+        <hr>
+
+        <h3>📄 Pagos Realizados</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Monto</th>
+              <th>Método</th>
+              <th>Fecha</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-pagos"></tbody>
+        </table>
+      </section>
+
+
+      <section id="usuarios" class="section-container">
+        <h2>👥 Gestión de Usuarios</h2>
+
+        <form id="form-usuario">
+          <input type="hidden" id="idUsuario">
+          <label>Nombre: <input type="text" id="nombre" required></label>
+          <label>Usuario: <input type="text" id="usuario" required></label>
+          <label>Contraseña: <input type="password" id="contrasena" required></label>
+          <label>Rol:
+            <select id="rol" required>
+              <option value="">-- Selecciona --</option>
+              <option value="ADMIN">ADMIN</option>
+              <option value="CAJERO">CAJERO</option>
+              <option value="VIGILANTE">VIGILANTE</option>
+            </select>
+          </label>
+          <label>Activo: <input type="checkbox" id="activo" checked></label>
+          <button type="submit">Guardar Usuario</button>
+        </form>
+
+        <hr>
+
+        <h3>📋 Lista de Usuarios</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Usuario</th>
+              <th>Rol</th>
+              <th>Activo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-usuarios"></tbody>
+        </table>
+
+
+      </section>
+
+<!-- Registrar Entrada al Parqueadero -->
+<section id="registro-parqueo" class="section-container">
+  <h2>📥 Registrar Entrada al Parqueadero</h2>
+  <form id="form-registro-parqueo">
+  <label for="espacioEntrada">Espacio:</label>
+  <select id="espacioEntrada" required></select>
+
+  <label for="tarifaEntrada">Tarifa:</label>
+  <select id="tarifaEntrada" required></select>
+
+  <label for="usuarioEntrada">Usuario:</label>
+  <select id="usuarioEntrada" required></select>
+
+ <label for="placaEntrada">Placa del vehículo:</label>
+<input type="text" id="placaEntrada" list="listaPlacas" autocomplete="off" required />
+<datalist id="listaPlacas"></datalist>
+
+
+  <button type="submit">Registrar</button>
+
+  <p id="mensajeEntrada"></p>
+</form>
 </section>
 
-<section id="pagos" class="section-container">
-  <h2>📄 Pagos Realizados</h2>
-  <table id="tabla-pagos">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Registro</th>
-        <th>Monto</th>
-        <th>Método</th>
-        <th>Fecha</th>
-        <th>Usuario</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-  <p>Total pagos: <span id="total-pagos">0</span></p>
-</section>
 
 
     </main>
   </div>
-  
 
 
-<div id="modal-editar" class="modal hidden">
-  <div class="modal-content">
-    <h2>Editar Vehículo</h2>
-    <form id="form-editar-vehiculo">
-      <label>Placa: <input type="text" id="editar-placa" disabled /></label>
-      <label>Tipo: <input type="text" id="editar-tipo" /></label>
-      <label>Color: <input type="text" id="editar-color" /></label>
-      <label>Marca: <input type="text" id="editar-marca" /></label>
-      <label>Modelo: <input type="text" id="editar-modelo" /></label>
-      <button type="submit">Guardar</button>
-      <button type="button" id="cerrar-modal">Cancelar</button>
-    </form>
+
+  <div id="modal-editar" class="modal hidden">
+    <div class="modal-content">
+      <h2>Editar Vehículo</h2>
+      <form id="form-editar-vehiculo">
+        <label>Placa: <input type="text" id="editar-placa" disabled /></label>
+        <label>Tipo: <input type="text" id="editar-tipo" /></label>
+        <label>Color: <input type="text" id="editar-color" /></label>
+        <label>Marca: <input type="text" id="editar-marca" /></label>
+        <label>Modelo: <input type="text" id="editar-modelo" /></label>
+        <button type="submit">Guardar</button>
+        <button type="button" id="cerrar-modal">Cancelar</button>
+      </form>
+    </div>
   </div>
-</div>
 
-<div id="modal-editar-tarifa" class="modal hidden">
-  <div class="modal-content">
-    <h2>Editar Tarifa</h2>
-    <form id="form-editar-tarifa">
-      <label>Tipo de Vehículo:
-        <input type="text" id="editar-tipoVehiculo" required />
-      </label>
-      <label>Tipo de Tiempo:
-        <select id="editar-tipoTiempo" required>
-          <option value="">-- Selecciona --</option>
-          <option value="HORA">Hora</option>
-          <option value="DIA">Día</option>
-          <option value="MES">Mes</option>
-        </select>
-      </label>
-      <label>Valor Hora:
-        <input type="number" id="editar-valorHora" required />
-      </label>
-      <label>Valor Total:
-        <input type="number" id="editar-valor" required />
-      </label>
-      <label>Valor Fracción:
-        <input type="number" id="editar-valorFraccion" />
-      </label>
-      <label>Activo:
-        <input type="checkbox" id="editar-activo" />
-      </label>
+  <div id="modal-editar-tarifa" class="modal hidden">
+    <div class="modal-content">
+      <h2>Editar Tarifa</h2>
+      <form id="form-editar-tarifa">
+        <label>Tipo de Vehículo:
+          <input type="text" id="editar-tipoVehiculo" required />
+        </label>
+        <label>Tipo de Tiempo:
+          <select id="editar-tipoTiempo" required>
+            <option value="">-- Selecciona --</option>
+            <option value="HORA">Hora</option>
+            <option value="DIA">Día</option>
+            <option value="MES">Mes</option>
+          </select>
+        </label>
+        <label>Valor Hora:
+          <input type="number" id="editar-valorHora" required />
+        </label>
+        <label>Valor Total:
+          <input type="number" id="editar-valor" required />
+        </label>
+        <label>Valor Fracción:
+          <input type="number" id="editar-valorFraccion" />
+        </label>
+        <label>Activo:
+          <input type="checkbox" id="editar-activo" />
+        </label>
 
-      <button type="submit">Guardar</button>
-      <button type="button" id="cerrar-modal-editar">Cancelar</button>
-    </form>
+        <button type="submit">Guardar</button>
+        <button type="button" id="cerrar-modal-editar">Cancelar</button>
+      </form>
+    </div>
   </div>
-</div>
 
 
 
@@ -281,4 +370,5 @@
 
 
 </body>
+
 </html>

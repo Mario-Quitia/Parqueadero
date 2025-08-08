@@ -1,13 +1,19 @@
 package com.example.Parqueadero.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.List;
 
 @Entity
 @Table(name = "vehiculos") // opcional, puedes omitirlo si querés que la tabla se llame "vehiculo"
 public class Vehiculo {
+@JsonIgnore
+@OneToMany(mappedBy = "vehiculo")
+private List<RegistroParqueo> registros;
 
     
   @Id

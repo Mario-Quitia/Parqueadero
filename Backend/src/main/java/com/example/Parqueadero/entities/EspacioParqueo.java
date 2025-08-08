@@ -1,5 +1,6 @@
 package com.example.Parqueadero.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -29,6 +30,7 @@ public class EspacioParqueo {
     @Column(name = "estado", nullable = false, length = 15)
     private String estado;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "espacioParqueo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegistroParqueo> registros = new ArrayList<>();
 

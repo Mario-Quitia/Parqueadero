@@ -1,5 +1,6 @@
 package com.example.Parqueadero.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class UsuarioSistema {
     private boolean activo;
 
     // Relaciones
+   @JsonIgnore
 
     @OneToMany(mappedBy = "usuarioRegistro")
     private List<RegistroParqueo> registrosParqueo;

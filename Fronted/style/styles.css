@@ -292,3 +292,9 @@ input, select {
   cursor: pointer;
   font-size: 1.1rem;
 }
+.placa-ocupado {
+  font-size: 0.75rem;
+  color: #ff4d4d; /* rojo suave para alerta */
+  display: block;
+  margin-top: 2px;
+}

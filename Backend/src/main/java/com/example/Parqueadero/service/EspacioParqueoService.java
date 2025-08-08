@@ -15,4 +15,5 @@ public interface EspacioParqueoService {
     void generarEspacios(int cantidad, String tipo);
     void eliminarMultiples(List<Long> ids);
 
+
 }

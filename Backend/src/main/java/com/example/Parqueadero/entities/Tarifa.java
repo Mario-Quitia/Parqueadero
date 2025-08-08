@@ -1,8 +1,10 @@
 package com.example.Parqueadero.entities;
 
 import com.example.Parqueadero.enums.TipoTiempo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "tarifas")
@@ -29,8 +31,14 @@ public class Tarifa {
     private Double valorFraccion;
 
     @Column(name = "activo", nullable = false)
+    
+    
     private boolean activo;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "tarifa")
+private List<RegistroParqueo> registros;
+    
     // Constructor vacío
     public Tarifa() {}
 

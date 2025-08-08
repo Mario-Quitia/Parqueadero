@@ -30,7 +30,7 @@ public class UsuarioSistemaController {
         return ResponseEntity.ok(service.crearUsuario(usuario));
     }
 
-    @GetMapping
+    @GetMapping 
     public ResponseEntity<List<UsuarioSistema>> listar() {
         return ResponseEntity.ok(service.obtenerTodos());
     }

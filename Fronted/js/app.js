@@ -29,15 +29,23 @@ document.addEventListener("DOMContentLoaded", () => {
   let editandoTarifa = false;
   let idTarifaOriginal = null;
 
-///Espacios
+  ///Espacios
 
   const tablaEspaciosBody = document.querySelector("#tabla-espacios tbody");
   const gridEspacios = document.getElementById("grid-espacios");
   const btnEliminarSeleccionados = document.getElementById("btn-eliminar-seleccionados");
   const contadorSeleccionados = document.getElementById("contador-seleccionados");
-    let espaciosSeleccionados = new Set();
+  let espaciosSeleccionados = new Set();
 
 
+  //pagos 
+
+  const formPago = document.getElementById("form-pago");
+  const tablaPagos = document.getElementById("tabla-pagos");
+
+  //usuarios
+  const formUsuario = document.getElementById("form-usuario");
+  const tablaUsuarios = document.getElementById("tabla-usuarios");
 
 
   // --- Funciones generales ---
@@ -395,157 +403,338 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-// Función auxiliar para obtener el ícono según tipo
-function obtenerIconoPorTipo(tipo) {
-  switch (tipo.toLowerCase()) {
-    case "carro": return "🚗";
-    case "moto": return "🏍️";
-    case "bicicleta": return "🚲";
-    default: return "❓";
-  }
-}
-
-// Renderiza espacios en el contenedor visual principal
-function renderizarEspaciosVisuales(espacios) {
-  const grid = document.getElementById("grid-espacios");
-  if (!grid) {
-    console.error("No se encontró el contenedor grid-espacios");
-    return;
+  // Función auxiliar para obtener el ícono según tipo
+  function obtenerIconoPorTipo(tipo) {
+    switch (tipo.toLowerCase()) {
+      case "carro": return "🚗";
+      case "moto": return "🏍️";
+      case "bicicleta": return "🚲";
+      default: return "❓";
+    }
   }
 
-  grid.innerHTML = "";
+  // Renderiza espacios en el contenedor visual principal
+  function renderizarEspaciosVisuales(espacios) {
+    const grid = document.getElementById("grid-espacios");
+    if (!grid) {
+      console.error("No se encontró el contenedor grid-espacios");
+      return;
+    }
 
-  espacios.forEach(e => {
-    const div = document.createElement("div");
-    div.classList.add("espacio");
-    div.classList.add(e.estado.toLowerCase() === "libre" ? "libre" : "ocupado");
+    grid.innerHTML = "";
 
-    const icono = obtenerIconoPorTipo(e.tipo);
+    espacios.forEach(e => {
+      const div = document.createElement("div");
+      div.classList.add("espacio");
+      div.classList.add(e.estado.toLowerCase() === "libre" ? "libre" : "ocupado");
 
-    div.title = `Espacio ${e.numero} - ${e.tipo} - ${e.estado}`;
-    div.innerHTML = `
+      const icono = obtenerIconoPorTipo(e.tipo);
+
+      div.title = `Espacio ${e.numero} - ${e.tipo} - ${e.estado}`;
+      div.innerHTML = `
       <span class="icono">${icono}</span>
       <small>${e.numero}</small>
     `;
 
-    grid.appendChild(div);
-  });
-}
+      grid.appendChild(div);
+    });
+  }
 
-// Lista espacios y los renderiza visualmente
-function cargarEspacios() {
-  fetch("http://localhost:8081/api/espacios-parqueo/listar")
-    .then(res => res.json())
-    .then(data => {
-      console.log("🔍 Espacios recibidos del backend:", data);
-      gridEspacios.innerHTML = "";
-      espaciosSeleccionados.clear();
+  // Lista espacios y los renderiza visualmente
+  function cargarEspacios() {
+    fetch("http://localhost:8081/api/espacios-parqueo/listar")
+      .then(res => res.json())
+      .then(data => {
+        console.log("🔍 Espacios recibidos del backend:", data);
+        gridEspacios.innerHTML = "";
+        espaciosSeleccionados.clear();
+        actualizarEstadoEliminar();
+        data.forEach(e => gridEspacios.appendChild(renderizarEspacioConCheckbox(e)));
+      })
+      .catch(err => console.error("Error al listar espacios:", err));
+  }
+
+  // 🗑️ Evento: eliminar seleccionados
+  btnEliminarSeleccionados.addEventListener("click", async () => {
+    if (espaciosSeleccionados.size === 0) return;
+
+    if (!confirm(`¿Eliminar ${espaciosSeleccionados.size} espacio(s)?`)) return;
+
+    try {
+      const res = await fetch("http://localhost:8081/api/espacios-parqueo/eliminar-multiples", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(espaciosSeleccionados) })
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      alert("Espacios eliminados correctamente");
+      cargarEspacios(); // Recargar visualmente
+    } catch (err) {
+      alert("Error al eliminar espacios: " + err.message);
+    }
+  });
+
+  // Enviar formulario para generar espacios
+  const formGenerarEspacios = document.getElementById("form-generar-espacios");
+  formGenerarEspacios.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const cantidad = parseInt(document.getElementById("cantidad").value);
+    const tipo = document.getElementById("tipoEspacio").value;
+
+    if (!cantidad || !tipo) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:8081/api/espacios-parqueo/generar?cantidad=${cantidad}&tipo=${tipo}`, {
+        method: "POST"
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+
+      const mensaje = await res.text();
+      alert(mensaje);
+      formGenerarEspacios.reset();
+      await cargarEspacios(); // ✅ Corrección aquí
+    } catch (err) {
+      console.error("Error al generar espacios: " + err.message);
+    }
+  });
+
+  function actualizarEstadoEliminar() {
+    const count = espaciosSeleccionados.size;
+    contadorSeleccionados.textContent = `${count} seleccionado${count !== 1 ? 's' : ''}`;
+    btnEliminarSeleccionados.disabled = count === 0;
+  }
+
+  // Renderiza espacio con checkbox
+  function renderizarEspacioConCheckbox(espacio) {
+    const espacioContainer = document.createElement("div");
+    espacioContainer.className = "espacio-item";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "espacio-checkbox";
+    checkbox.dataset.id = espacio.id;
+
+    checkbox.addEventListener("change", function () {
+      if (this.checked) {
+        espaciosSeleccionados.add(espacio.id);
+      } else {
+        espaciosSeleccionados.delete(espacio.id);
+      }
       actualizarEstadoEliminar();
-      data.forEach(e => gridEspacios.appendChild(renderizarEspacioConCheckbox(e)));
-    })
-    .catch(err => console.error("Error al listar espacios:", err));
-}
-
-// 🗑️ Evento: eliminar seleccionados
-btnEliminarSeleccionados.addEventListener("click", async () => {
-  if (espaciosSeleccionados.size === 0) return;
-
-  if (!confirm(`¿Eliminar ${espaciosSeleccionados.size} espacio(s)?`)) return;
-
-  try {
-    const res = await fetch("http://localhost:8081/api/espacios-parqueo/eliminar-multiples", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ids: Array.from(espaciosSeleccionados) })
     });
 
-    if (!res.ok) throw new Error(await res.text());
+    const btn = document.createElement("button");
+    btn.className = `espacio-btn ${espacio.estado.toLowerCase() === "libre" ? "libre" : "ocupado"}`;
 
-    alert("Espacios eliminados correctamente");
-    cargarEspacios(); // Recargar visualmente
-  } catch (err) {
-    alert("Error al eliminar espacios: " + err.message);
-  }
-});
-
-// Enviar formulario para generar espacios
-const formGenerarEspacios = document.getElementById("form-generar-espacios");
-formGenerarEspacios.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const cantidad = parseInt(document.getElementById("cantidad").value);
-  const tipo = document.getElementById("tipoEspacio").value;
-
-  if (!cantidad || !tipo) {
-    alert("Por favor completa todos los campos.");
-    return;
-  }
-
-  try {
-    const res = await fetch(`http://localhost:8081/api/espacios-parqueo/generar?cantidad=${cantidad}&tipo=${tipo}`, {
-      method: "POST"
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText);
-    }
-
-    const mensaje = await res.text();
-    alert(mensaje);
-    formGenerarEspacios.reset();
-    await cargarEspacios(); // ✅ Corrección aquí
-  } catch (err) {
-    console.error("Error al generar espacios: " + err.message);
-  }
-});
-
-function actualizarEstadoEliminar() {
-  const count = espaciosSeleccionados.size;
-  contadorSeleccionados.textContent = `${count} seleccionado${count !== 1 ? 's' : ''}`;
-  btnEliminarSeleccionados.disabled = count === 0;
-}
-
-// Renderiza espacio con checkbox
-function renderizarEspacioConCheckbox(espacio) {
-  const espacioContainer = document.createElement("div");
-  espacioContainer.className = "espacio-item";
-
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.className = "espacio-checkbox";
-  checkbox.dataset.id = espacio.id;
-
-  checkbox.addEventListener("change", function () {
-    if (this.checked) {
-      espaciosSeleccionados.add(espacio.id);
-    } else {
-      espaciosSeleccionados.delete(espacio.id);
-    }
-    actualizarEstadoEliminar();
-  });
-
-  const btn = document.createElement("button");
-  btn.className = `espacio-btn ${espacio.estado.toLowerCase() === "libre" ? "libre" : "ocupado"}`;
-
-  const icono = obtenerIconoPorTipo(espacio.tipo); // ✅ Siempre usamos la misma lógica
-  btn.innerHTML = `
+    const icono = obtenerIconoPorTipo(espacio.tipo); // ✅ Siempre usamos la misma lógica
+    btn.innerHTML = `
     <span class="icono">${icono}</span>
     <small>${espacio.numero}</small>
   `;
 
-  espacioContainer.appendChild(checkbox);
-  espacioContainer.appendChild(btn);
+    espacioContainer.appendChild(checkbox);
+    espacioContainer.appendChild(btn);
 
-  return espacioContainer;
-}
+    return espacioContainer;
+  }
 
+  ///pagos
+
+  formPago.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const idRegistro = document.getElementById("idRegistro").value;
+    const idUsuario = document.getElementById("idUsuario").value;
+    const metodo = document.getElementById("metodoPago").value;
+
+    if (!idRegistro || !idUsuario || !metodo) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+
+    try {
+      const url = `http://localhost:8081/api/pagos/realizar/${idRegistro}/${idUsuario}?metodoPago=${encodeURIComponent(metodo)}`;
+      const res = await fetch(url, { method: "POST" });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      const pago = await res.json();
+      alert(`Pago realizado correctamente: $${pago.monto}`);
+      formPago.reset();
+      listarPagos();
+    } catch (err) {
+      console.error("❌ Error al realizar pago:", err);
+      alert("Error al realizar pago: " + err.message);
+    }
+  });
+
+  // Cargar lista de pagos
+  async function listarPagos() {
+    try {
+      const res = await fetch("http://localhost:8081/api/pagos");
+      const pagos = await res.json();
+
+      tablaPagos.innerHTML = "";
+
+      pagos.forEach(p => {
+        const fila = document.createElement("tr");
+
+        fila.innerHTML = `
+        <td>${p.id}</td>
+        <td>$${p.monto}</td>
+        <td>${p.metodoPago}</td>
+        <td>${new Date(p.fechaPago).toLocaleString()}</td>
+        <td><button onclick="eliminarPago(${p.id})">🗑️</button></td>
+      `;
+
+        tablaPagos.appendChild(fila);
+      });
+
+    } catch (err) {
+      console.error("❌ Error al listar pagos:", err);
+    }
+  }
+
+  // Eliminar un pago
+  async function eliminarPago(id) {
+    if (!confirm("¿Eliminar este pago?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:8081/api/pagos/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(await res.text());
+      alert("Pago eliminado correctamente");
+      listarPagos();
+    } catch (err) {
+      console.error("❌ Error al eliminar pago:", err);
+      alert("Error al eliminar pago: " + err.message);
+    }
+  }
+
+
+  //usuarios 
+  // Crear o actualizar usuario
+  formUsuario.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = document.getElementById("idUsuario").value;
+    const data = {
+      nombre: document.getElementById("nombre").value,
+      usuario: document.getElementById("usuario").value,
+      contrasena: document.getElementById("contrasena").value,
+      rol: document.getElementById("rol").value,
+      activo: document.getElementById("activo").checked
+    };
+
+    try {
+      const url = id
+        ? `http://localhost:8081/api/usuarios/${id}`
+        : "http://localhost:8081/api/usuarios/crear";
+
+      const method = id ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      alert(id ? "Usuario actualizado" : "Usuario creado");
+      formUsuario.reset();
+      listarUsuarios();
+    } catch (err) {
+      console.error("❌ Error al guardar usuario:", err);
+      alert("Error al guardar usuario: " + err.message);
+    }
+  });
+
+  // Listar todos los usuarios
+  async function listarUsuarios() {
+    try {
+      const res = await fetch("http://localhost:8081/api/usuarios");
+      const usuarios = await res.json();
+
+      tablaUsuarios.innerHTML = "";
+
+      usuarios.forEach(u => {
+        const fila = document.createElement("tr");
+
+        fila.innerHTML = `
+        <td>${u.id}</td>
+        <td>${u.nombre}</td>
+        <td>${u.usuario}</td>
+        <td>${u.rol}</td>
+        <td>${u.activo ? "✅" : "❌"}</td>
+        <td>
+          <button onclick="cargarUsuario(${u.id})">✏️</button>
+          <button onclick="eliminarUsuario(${u.id})">🗑️</button>
+        </td>
+      `;
+
+        tablaUsuarios.appendChild(fila);
+      });
+    } catch (err) {
+      console.error("❌ Error al listar usuarios:", err);
+    }
+  }
+
+  // Cargar usuario en el formulario
+  async function cargarUsuario(id) {
+    try {
+      const res = await fetch(`http://localhost:8081/api/usuarios/${id}`);
+      const u = await res.json();
+
+      document.getElementById("idUsuario").value = u.id;
+      document.getElementById("nombre").value = u.nombre;
+      document.getElementById("usuario").value = u.usuario;
+      document.getElementById("contrasena").value = u.contrasena;
+      document.getElementById("rol").value = u.rol;
+      document.getElementById("activo").checked = u.activo;
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      console.error("❌ Error al cargar usuario:", err);
+      alert("No se pudo cargar el usuario");
+    }
+  }
+
+  // Eliminar usuario
+  async function eliminarUsuario(id) {
+    if (!confirm("¿Seguro que deseas eliminar este usuario?")) return;
+
+    try {
+      const res = await fetch(`http://localhost:8081/api/usuarios/${id}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      alert("Usuario eliminado correctamente");
+      listarUsuarios();
+    } catch (err) {
+      console.error("❌ Error al eliminar usuario:", err);
+      alert("Error al eliminar usuario: " + err.message);
+    }
+  }
 
 
   // --- Inicialización ---
-fetchVehiculos();
-fetchTarifas();
-cargarEspacios();
+  fetchVehiculos();
+  fetchTarifas();
+  cargarEspacios();
+  listarPagos();
+  listarUsuarios();
 
 });
 
