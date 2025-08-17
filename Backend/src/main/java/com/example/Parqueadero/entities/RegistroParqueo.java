@@ -11,112 +11,69 @@ public class RegistroParqueo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "placa_vehiculo", nullable = false)
+    // Vehículo asociado al registro
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "placa_vehiculo", referencedColumnName = "placa", nullable = false)
     private Vehiculo vehiculo;
 
+    // Hora de entrada del vehículo
     @Column(name = "hora_entrada", nullable = false)
     private LocalDateTime horaEntrada;
 
+    // Hora de salida (si es null, el vehículo sigue parqueado)
     @Column(name = "hora_salida")
     private LocalDateTime horaSalida;
 
+    // Monto total pagado por este registro
     @Column(name = "total_pagado")
     private Double totalPagado;
 
-    @ManyToOne
+    // Espacio físico donde se parqueó el vehículo
+    @ManyToOne(optional = false)
     @JoinColumn(name = "espacio_id", nullable = false)
     private EspacioParqueo espacioParqueo;
-    
-         @ManyToOne
+
+    // Tarifa usada para calcular el costo
+    @ManyToOne(optional = false)
     @JoinColumn(name = "tarifa_id", nullable = false)
     private Tarifa tarifa;
-    
-     @ManyToOne
-@JoinColumn(name = "usuario_id", nullable = false)
-private UsuarioSistema usuarioRegistro;
-    
-         
-    
-    
+
+    // Usuario del sistema que registró la entrada
+
 
     // Constructor vacío requerido por JPA
     public RegistroParqueo() {}
 
-    // Constructor con atributos
-    public RegistroParqueo(Vehiculo vehiculo, LocalDateTime horaEntrada, LocalDateTime horaSalida,
-                           Double totalPagado, EspacioParqueo espacioParqueo) {
+    // Constructor con atributos clave
+    public RegistroParqueo(Vehiculo vehiculo, LocalDateTime horaEntrada, EspacioParqueo espacioParqueo, Tarifa tarifa, UsuarioSistema usuarioRegistro) {
         this.vehiculo = vehiculo;
         this.horaEntrada = horaEntrada;
-        this.horaSalida = horaSalida;
-        this.totalPagado = totalPagado;
         this.espacioParqueo = espacioParqueo;
+        this.tarifa = tarifa;
+        this.totalPagado = 0.0; // Por defecto 0 hasta que se realice el pago
     }
 
-    // Getters y setters
+    // Getters y Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public Vehiculo getVehiculo() { return vehiculo; }
+    public void setVehiculo(Vehiculo vehiculo) { this.vehiculo = vehiculo; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public LocalDateTime getHoraEntrada() { return horaEntrada; }
+    public void setHoraEntrada(LocalDateTime horaEntrada) { this.horaEntrada = horaEntrada; }
 
-    public Vehiculo getVehiculo() {
-        return vehiculo;
-    }
+    public LocalDateTime getHoraSalida() { return horaSalida; }
+    public void setHoraSalida(LocalDateTime horaSalida) { this.horaSalida = horaSalida; }
 
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
-    }
+    public Double getTotalPagado() { return totalPagado; }
+    public void setTotalPagado(Double totalPagado) { this.totalPagado = totalPagado; }
 
-    public LocalDateTime getHoraEntrada() {
-        return horaEntrada;
-    }
+    public EspacioParqueo getEspacioParqueo() { return espacioParqueo; }
+    public void setEspacioParqueo(EspacioParqueo espacioParqueo) { this.espacioParqueo = espacioParqueo; }
 
-    public void setHoraEntrada(LocalDateTime horaEntrada) {
-        this.horaEntrada = horaEntrada;
-    }
+    public Tarifa getTarifa() { return tarifa; }
+    public void setTarifa(Tarifa tarifa) { this.tarifa = tarifa; }
 
-    public LocalDateTime getHoraSalida() {
-        return horaSalida;
-    }
-
-    public void setHoraSalida(LocalDateTime horaSalida) {
-        this.horaSalida = horaSalida;
-    }
-
-    public Double getTotalPagado() {
-        return totalPagado;
-    }
-
-    public void setTotalPagado(Double totalPagado) {
-        this.totalPagado = totalPagado;
-    }
-
-    public EspacioParqueo getEspacioParqueo() {
-        return espacioParqueo;
-    }
-
-    public void setEspacioParqueo(EspacioParqueo espacioParqueo) {
-        this.espacioParqueo = espacioParqueo;
-    }
-   
-    public UsuarioSistema getUsuarioRegistro() {
-    return usuarioRegistro;
-}
-
-public void setUsuarioRegistro(UsuarioSistema usuarioRegistro) {
-    this.usuarioRegistro = usuarioRegistro;
-}
-    
-  public Tarifa getTarifa() {
-    return tarifa;
-}
-
-public void setTarifa(Tarifa tarifa) {
-    this.tarifa = tarifa;
-}  
     
 }

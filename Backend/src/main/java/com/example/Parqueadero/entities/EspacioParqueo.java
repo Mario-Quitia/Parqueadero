@@ -1,6 +1,7 @@
 package com.example.Parqueadero.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -82,4 +83,35 @@ public class EspacioParqueo {
     public void setRegistros(List<RegistroParqueo> registros) {
         this.registros = registros;
     }
+    
+    
+    @JsonProperty("placa")
+
+      public String getPlacaVehiculo() {
+        for (RegistroParqueo registro : registros) {
+            if (registro.getHoraSalida() == null && registro.getVehiculo() != null) {
+                return registro.getVehiculo().getPlaca();
+            }
+        }
+        return null; // espacio libre
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
+
+
+
+
+
+
+
+
+

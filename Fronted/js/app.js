@@ -85,166 +85,170 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // --- VEHÍCULOS ---
 
-  // Cargar listado vehículos
-  async function fetchVehiculos() {
-    try {
-      const res = await fetch("http://localhost:8081/api/vehiculos/listar");
-      if (!res.ok) throw new Error("No se pudo obtener la lista de vehículos");
-      const vehiculos = await res.json();
+async function fetchVehiculos() {
+  try {
+    const res = await fetch("http://localhost:8081/api/vehiculos/listar");
+    if (!res.ok) throw new Error("No se pudo obtener la lista de vehículos");
+    const vehiculos = await res.json();
 
-      tablaVehiculosBody.innerHTML = "";
-      vehiculos.forEach(v => {
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${v.placa}</td>
-          <td>${v.tipo}</td>
-          <td>${v.color}</td>
-          <td>${v.marca}</td>
-          <td>${v.modelo}</td>
-          <td>
-            <button class="editar-vehiculo-btn" data-placa="${v.placa}">✏️</button>
-            <button class="borrar-vehiculo-btn" data-placa="${v.placa}">🗑️</button>
-          </td>
-        `;
-        tablaVehiculosBody.appendChild(fila);
-      });
+    tablaVehiculosBody.innerHTML = "";
+    vehiculos.forEach(v => {
+      const fila = document.createElement("tr");
+      fila.innerHTML = `
+        <td>${v.placa}</td>
+        <td>${v.tipo}</td>
+        <td>${v.color}</td>
+        <td>${v.marca}</td>
+        <td>${v.modelo}</td>
+        <td>
+          <button class="editar-vehiculo-btn" data-placa="${v.placa}">✏️</button>
+          <button class="borrar-vehiculo-btn" data-placa="${v.placa}">🗑️</button>
+        </td>
+      `;
+      tablaVehiculosBody.appendChild(fila);
+    });
 
-      totalVehiculos.textContent = vehiculos.length;
+    totalVehiculos.textContent = vehiculos.length;
 
-      // Agregar eventos botones
-      document.querySelectorAll(".editar-vehiculo-btn").forEach(btn => {
-        btn.addEventListener("click", () => cargarVehiculo(btn.dataset.placa));
-      });
+    // Agregar eventos botones
+    document.querySelectorAll(".editar-vehiculo-btn").forEach(btn => {
+      btn.addEventListener("click", () => cargarVehiculo(btn.dataset.placa));
+    });
 
-      document.querySelectorAll(".borrar-vehiculo-btn").forEach(btn => {
-        btn.addEventListener("click", () => eliminarVehiculo(btn.dataset.placa));
-      });
-    } catch (err) {
-      alert("Error al cargar vehículos: " + err.message);
-    }
+    document.querySelectorAll(".borrar-vehiculo-btn").forEach(btn => {
+      btn.addEventListener("click", () => eliminarVehiculo(btn.dataset.placa));
+    });
+
+  } catch (err) {
+    alert("Error al cargar vehículos: " + err.message);
+  }
+}
+
+// --- Cargar vehículo para editar ---
+async function cargarVehiculo(placa) {
+  try {
+    const res = await fetch(`http://localhost:8081/api/vehiculos/obtener/${placa.toUpperCase()}`);
+    if (!res.ok) throw new Error("Vehículo no encontrado");
+    const v = await res.json();
+
+    document.getElementById("editar-placa").value = v.placa;
+    document.getElementById("editar-tipo").value = v.tipo;
+    document.getElementById("editar-color").value = v.color;
+    document.getElementById("editar-marca").value = v.marca;
+    document.getElementById("editar-modelo").value = v.modelo;
+
+    placaOriginal = v.placa;
+    editandoVehiculo = true;
+
+    mostrarModalVehiculo();
+    document.querySelector('[data-section="listado"]').click();
+  } catch (err) {
+    alert("Error al cargar vehículo: " + err.message);
+  }
+}
+
+// --- Guardar vehículo (crear o editar) ---
+vehiculoForm.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const vehiculo = {
+    placa: document.getElementById("placa").value.toUpperCase(),
+    tipo: document.getElementById("tipo").value,
+    color: document.getElementById("color").value,
+    marca: document.getElementById("marca").value,
+    modelo: document.getElementById("modelo").value,
+  };
+
+ try {
+  let res;
+  if (editandoVehiculo) {
+    res = await fetch(`http://localhost:8081/api/vehiculos/editar/${placaOriginal.toUpperCase()}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vehiculo)
+    });
+  } else {
+    res = await fetch("http://localhost:8081/api/vehiculos/crear", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vehiculo)
+    });
   }
 
-  // Cargar vehículo para editar (modal)
-  async function cargarVehiculo(placa) {
-    try {
-      const res = await fetch(`http://localhost:8081/api/vehiculos/obtener/${placa}`);
-      if (!res.ok) throw new Error("Vehículo no encontrado");
-      const v = await res.json();
+  if (!res.ok) {
+    const errorText = await res.text();
 
-      document.getElementById("editar-placa").value = v.placa;
-      document.getElementById("editar-tipo").value = v.tipo;
-      document.getElementById("editar-color").value = v.color;
-      document.getElementById("editar-marca").value = v.marca;
-      document.getElementById("editar-modelo").value = v.modelo;
-
-      placaOriginal = v.placa;
-      editandoVehiculo = true;
-
-      mostrarModalVehiculo();
-
-      // Cambiar a sección vehículos si quieres:
-      document.querySelector('[data-section="listado"]').click();
-    } catch (err) {
-      alert("Error al cargar vehículo: " + err.message);
+    // 👇 personalización del mensaje
+    if (errorText.includes("ya está registrado") || errorText.includes("ya existe")) {
+      throw new Error("La placa ya se encuentra registrada, verifica nuevamente.");
     }
+
+    throw new Error(errorText);
   }
 
-  // Guardar vehículo (crear o editar)
-  vehiculoForm.addEventListener("submit", async e => {
-    e.preventDefault();
+  alert("Vehículo guardado correctamente");
+  vehiculoForm.reset();
+  editandoVehiculo = false;
+  placaOriginal = null;
+  await fetchVehiculos();
 
-    const vehiculo = {
-      placa: document.getElementById("placa").value,
-      tipo: document.getElementById("tipo").value,
-      color: document.getElementById("color").value,
-      marca: document.getElementById("marca").value,
-      modelo: document.getElementById("modelo").value,
-    };
+} catch (err) {
+  alert(err.message); // ya no antepone "Error al guardar..."
+}
 
-    try {
-      let res;
-      if (editandoVehiculo) {
-        res = await fetch(`http://localhost:8081/api/vehiculos/editar/${placaOriginal}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(vehiculo)
-        });
-      } else {
-        res = await fetch("http://localhost:8081/api/vehiculos/crear", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(vehiculo)
-        });
-      }
+});
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText);
-      }
+// --- Guardar edición desde modal ---
+formEditarVehiculo.addEventListener("submit", async e => {
+  e.preventDefault();
 
-      alert("Vehículo guardado correctamente");
-      vehiculoForm.reset();
-      editandoVehiculo = false;
-      placaOriginal = null;
-      await fetchVehiculos();
+  const vehiculoEditado = {
+    tipo: document.getElementById("editar-tipo").value,
+    color: document.getElementById("editar-color").value,
+    marca: document.getElementById("editar-marca").value,
+    modelo: document.getElementById("editar-modelo").value,
+  };
 
-    } catch (err) {
-      alert("Error al guardar vehículo: " + err.message);
+  const placa = document.getElementById("editar-placa").value.toUpperCase();
+
+  try {
+    const res = await fetch(`http://localhost:8081/api/vehiculos/editar/${placa}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(vehiculoEditado)
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(errorText);
     }
-  });
 
-  // Guardar edición vehículo desde modal
-  formEditarVehiculo.addEventListener("submit", async e => {
-    e.preventDefault();
+    alert("Vehículo actualizado correctamente");
+    ocultarModalVehiculo();
+    await fetchVehiculos();
 
-    const vehiculoEditado = {
-      tipo: document.getElementById("editar-tipo").value,
-      color: document.getElementById("editar-color").value,
-      marca: document.getElementById("editar-marca").value,
-      modelo: document.getElementById("editar-modelo").value,
-    };
-
-    const placa = document.getElementById("editar-placa").value;
-
-    try {
-      const res = await fetch(`http://localhost:8081/api/vehiculos/editar/${placa}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(vehiculoEditado)
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(errorText);
-      }
-
-      alert("Vehículo actualizado correctamente");
-      ocultarModalVehiculo();
-      await fetchVehiculos();
-
-    } catch (err) {
-      alert("Error al actualizar vehículo: " + err.message);
-    }
-  });
-
-  // Eliminar vehículo
-  async function eliminarVehiculo(placa) {
-    if (!confirm("¿Seguro que deseas eliminar este vehículo?")) return;
-
-    try {
-      const res = await fetch(`http://localhost:8081/api/vehiculos/eliminar/${placa}`, {
-        method: "DELETE"
-      });
-
-      if (!res.ok && res.status !== 204) throw new Error("No se pudo eliminar el vehículo");
-
-      alert("Vehículo eliminado");
-      await fetchVehiculos();
-    } catch (err) {
-      alert("Error al eliminar vehículo: " + err.message);
-    }
+  } catch (err) {
+    alert("Error al actualizar vehículo: " + err.message);
   }
+});
 
+// --- Eliminar vehículo ---
+async function eliminarVehiculo(placa) {
+  if (!confirm("¿Seguro que deseas eliminar este vehículo?")) return;
+
+  try {
+    const res = await fetch(`http://localhost:8081/api/vehiculos/eliminar/${placa.toUpperCase()}`, {
+      method: "DELETE"
+    });
+
+    if (!res.ok && res.status !== 204) throw new Error("No se pudo eliminar el vehículo");
+
+    alert("Vehículo eliminado");
+    await fetchVehiculos();
+  } catch (err) {
+    alert("Error al eliminar vehículo: " + err.message);
+  }
+}
   // --- TARIFAS ---
 
   // Listar tarifas
@@ -413,32 +417,45 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Renderiza espacios en el contenedor visual principal
-  function renderizarEspaciosVisuales(espacios) {
-    const grid = document.getElementById("grid-espacios");
-    if (!grid) {
-      console.error("No se encontró el contenedor grid-espacios");
-      return;
+ 
+// ✅ Renderiza un espacio con checkbox y placa (si está ocupado)
+function renderizarEspacioConCheckbox(espacio) {
+  const espacioContainer = document.createElement("div");
+  espacioContainer.className = "espacio-item";
+
+  const checkbox = document.createElement("input");
+  checkbox.type = "checkbox";
+  checkbox.className = "espacio-checkbox";
+  checkbox.dataset.id = espacio.id;
+
+  checkbox.addEventListener("change", function () {
+    if (this.checked) {
+      espaciosSeleccionados.add(espacio.id);
+    } else {
+      espaciosSeleccionados.delete(espacio.id);
     }
+    actualizarEstadoEliminar();
+  });
 
-    grid.innerHTML = "";
+  const btn = document.createElement("button");
+  btn.className = `espacio-btn ${espacio.estado.toLowerCase() === "libre" ? "libre" : "ocupado"}`;
 
-    espacios.forEach(e => {
-      const div = document.createElement("div");
-      div.classList.add("espacio");
-      div.classList.add(e.estado.toLowerCase() === "libre" ? "libre" : "ocupado");
+  const icono = obtenerIconoPorTipo(espacio.tipo);
 
-      const icono = obtenerIconoPorTipo(e.tipo);
+  btn.innerHTML = `
+    <span class="icono">${icono}</span>
+    <small>${espacio.numero}</small>
+    ${espacio.estado.toLowerCase() === "ocupado" && espacio.placa 
+        ? `<div class="placa">${espacio.placa}</div>` 
+        : ""}
+  `;
 
-      div.title = `Espacio ${e.numero} - ${e.tipo} - ${e.estado}`;
-      div.innerHTML = `
-      <span class="icono">${icono}</span>
-      <small>${e.numero}</small>
-    `;
+  espacioContainer.appendChild(checkbox);
+  espacioContainer.appendChild(btn);
 
-      grid.appendChild(div);
-    });
-  }
+  return espacioContainer;
+}
+
 
   // Lista espacios y los renderiza visualmente
   function cargarEspacios() {
@@ -514,39 +531,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btnEliminarSeleccionados.disabled = count === 0;
   }
 
-  // Renderiza espacio con checkbox
-  function renderizarEspacioConCheckbox(espacio) {
-    const espacioContainer = document.createElement("div");
-    espacioContainer.className = "espacio-item";
-
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "espacio-checkbox";
-    checkbox.dataset.id = espacio.id;
-
-    checkbox.addEventListener("change", function () {
-      if (this.checked) {
-        espaciosSeleccionados.add(espacio.id);
-      } else {
-        espaciosSeleccionados.delete(espacio.id);
-      }
-      actualizarEstadoEliminar();
-    });
-
-    const btn = document.createElement("button");
-    btn.className = `espacio-btn ${espacio.estado.toLowerCase() === "libre" ? "libre" : "ocupado"}`;
-
-    const icono = obtenerIconoPorTipo(espacio.tipo); // ✅ Siempre usamos la misma lógica
-    btn.innerHTML = `
-    <span class="icono">${icono}</span>
-    <small>${espacio.numero}</small>
-  `;
-
-    espacioContainer.appendChild(checkbox);
-    espacioContainer.appendChild(btn);
-
-    return espacioContainer;
-  }
 
   ///pagos
 

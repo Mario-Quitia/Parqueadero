@@ -2,12 +2,10 @@ package com.example.Parqueadero.implementservice;
 
 import com.example.Parqueadero.entities.EspacioParqueo;
 import com.example.Parqueadero.entities.RegistroParqueo;
-import com.example.Parqueadero.entities.UsuarioSistema;
 import com.example.Parqueadero.entities.Vehiculo;
 import com.example.Parqueadero.enums.TipoTiempo;
 import com.example.Parqueadero.repository.EspacioParqueoRepository;
 import com.example.Parqueadero.repository.RegistroParqueoRepository;
-import com.example.Parqueadero.repository.UsuarioSistemaRepository;
 import com.example.Parqueadero.repository.VehiculoRepository;
 import com.example.Parqueadero.service.RegistroParqueoService;
 import org.slf4j.Logger;
@@ -28,19 +26,16 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
     private final RegistroParqueoRepository registroParqueoRepository;
     private final EspacioParqueoRepository espacioParqueoRepository;
     private final VehiculoRepository vehiculoRepository;
-    private final UsuarioSistemaRepository usuarioSistemaRepository;
 
     @Autowired
     public RegistroParqueoServiceImpl(
             RegistroParqueoRepository registroParqueoRepository,
             EspacioParqueoRepository espacioParqueoRepository,
-            VehiculoRepository vehiculoRepository,
-            UsuarioSistemaRepository usuarioSistemaRepository
+            VehiculoRepository vehiculoRepository
     ) {
         this.registroParqueoRepository = registroParqueoRepository;
         this.espacioParqueoRepository = espacioParqueoRepository;
         this.vehiculoRepository = vehiculoRepository;
-        this.usuarioSistemaRepository = usuarioSistemaRepository;
     }
 
     @Override
@@ -53,17 +48,12 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
 
         String placa = registro.getVehiculo().getPlaca();
         logger.info("===> Placa recibida: {}", placa);
-        
-        
-          // 🔐 VALIDACIÓN: ¿Ya hay un registro activo para esta placa?
-    Optional<RegistroParqueo> registroActivo = registroParqueoRepository.findByVehiculo_PlacaAndHoraSalidaIsNull(placa);
-    if (registroActivo.isPresent()) {
-        throw new RuntimeException("Este vehículo ya tiene un registro activo. No puede ingresar nuevamente.");
-    }
-        
-        
-        
-        
+
+        // 🔐 VALIDACIÓN: ¿Ya hay un registro activo para esta placa?
+        Optional<RegistroParqueo> registroActivo = registroParqueoRepository.findByVehiculo_PlacaAndHoraSalidaIsNull(placa);
+        if (registroActivo.isPresent()) {
+            throw new RuntimeException("Este vehículo ya tiene un registro activo. No puede ingresar nuevamente.");
+        }
 
         Vehiculo vehiculo = vehiculoRepository.findById(placa)
                 .orElseThrow(() -> new RuntimeException("Vehículo no encontrado con placa: " + placa));
@@ -71,17 +61,8 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
         registro.setVehiculo(vehiculo);
         logger.info("===> Vehículo encontrado: {}", vehiculo.getTipo());
 
-        if (registro.getUsuarioRegistro() == null || registro.getUsuarioRegistro().getId() == null) {
-            throw new RuntimeException("Usuario es obligatorio para crear el registro.");
-        }
-
-        Long usuarioId = registro.getUsuarioRegistro().getId();
-        logger.info("===> ID de usuario recibido: {}", usuarioId);
-
-        UsuarioSistema usuario = usuarioSistemaRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + usuarioId));
-        registro.setUsuarioRegistro(usuario);
-        logger.info("===> Usuario encontrado: {}", usuario.getNombre());
+        // 🚫 Se elimina la validación de usuario obligatorio
+        // Si en el futuro se maneja autenticación, aquí se podrá setear el usuario logueado
 
         String tipoVehiculo = vehiculo.getTipo();
         logger.info("===> Buscando espacio para tipo: {}", tipoVehiculo);

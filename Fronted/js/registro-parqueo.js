@@ -117,10 +117,9 @@ function registrarParqueo(event) {
   const placa = document.getElementById("placaEntrada").value.trim().toUpperCase();
   const espacioId = parseInt(document.getElementById("espacioEntrada").value);
   const tarifaId = parseInt(document.getElementById("tarifaEntrada").value);
-  const usuarioId = parseInt(document.getElementById("usuarioEntrada").value);
 
   // Validación básica
-  if (!placa || isNaN(espacioId) || isNaN(tarifaId) || isNaN(usuarioId)) {
+  if (!placa || isNaN(espacioId) || isNaN(tarifaId) ) {
     mensaje.textContent = "❌ Todos los campos son obligatorios y deben ser válidos.";
     mensaje.style.color = "red";
     alert("❌ Todos los campos son obligatorios y deben ser válidos.");
@@ -130,8 +129,8 @@ function registrarParqueo(event) {
   const data = {
     vehiculo: { placa: placa },
     espacioParqueo: { id: espacioId },
-    tarifa: { id: tarifaId },
-    usuarioRegistro: { id: usuarioId }
+    tarifa: { id: tarifaId }
+    
   };
 
   fetch("http://localhost:8081/api/registros/crear", {

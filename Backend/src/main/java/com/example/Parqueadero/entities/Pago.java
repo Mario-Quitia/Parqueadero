@@ -1,6 +1,6 @@
-
 package com.example.Parqueadero.entities;
 
+import com.example.Parqueadero.enums.MetodoPago;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -22,71 +22,48 @@ public class Pago {
     @Column(nullable = false)
     private Double monto;
 
-    @Column(name = "metodo_pago", length = 20)
-    private String metodoPago;
+    @Column(name = "metodo_pago", length = 20, nullable = false)
+    @Enumerated(EnumType.STRING)
+  private MetodoPago metodoPago;
 
     @ManyToOne
-@JoinColumn(name = "usuario_pago_id", nullable = false)
-private UsuarioSistema usuarioPago;
-    
-    
-    
+    @JoinColumn(name = "usuario_pago_id", nullable = false)
+    private UsuarioSistema usuarioPago;
+
     public Pago() {}
 
-    public Pago(RegistroParqueo registroParqueo, LocalDateTime fechaPago, Double monto, String metodoPago) {
+    public Pago(RegistroParqueo registroParqueo, LocalDateTime fechaPago, Double monto, String metodoPago, UsuarioSistema usuarioPago) {
         this.registroParqueo = registroParqueo;
         this.fechaPago = fechaPago;
         this.monto = monto;
-        this.metodoPago = metodoPago;
+        this.usuarioPago = usuarioPago;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public RegistroParqueo getRegistroParqueo() { return registroParqueo; }
+    public void setRegistroParqueo(RegistroParqueo registroParqueo) { this.registroParqueo = registroParqueo; }
 
-    public RegistroParqueo getRegistroParqueo() {
-        return registroParqueo;
-    }
+    public LocalDateTime getFechaPago() { return fechaPago; }
+    public void setFechaPago(LocalDateTime fechaPago) { this.fechaPago = fechaPago; }
 
-    public void setRegistroParqueo(RegistroParqueo registroParqueo) {
-        this.registroParqueo = registroParqueo;
-    }
+    public Double getMonto() { return monto; }
+    public void setMonto(Double monto) { this.monto = monto; }
 
-    public LocalDateTime getFechaPago() {
-        return fechaPago;
-    }
 
-    public void setFechaPago(LocalDateTime fechaPago) {
-        this.fechaPago = fechaPago;
-    }
+    public UsuarioSistema getUsuarioPago() { return usuarioPago; }
+    public void setUsuarioPago(UsuarioSistema usuarioPago) { this.usuarioPago = usuarioPago; }
 
-    public Double getMonto() {
-        return monto;
-    }
-
-    public void setMonto(Double monto) {
-        this.monto = monto;
-    }
-
-    public String getMetodoPago() {
+    public MetodoPago getMetodoPago() {
         return metodoPago;
     }
 
-    public void setMetodoPago(String metodoPago) {
+    public void setMetodoPago(MetodoPago metodoPago) {
         this.metodoPago = metodoPago;
     }
     
-   public UsuarioSistema getUsuarioPago() {
-    return usuarioPago;
-}
-
-public void setUsuarioPago(UsuarioSistema usuarioPago) {
-    this.usuarioPago = usuarioPago;
-}
- 
+    
+    
     
 }

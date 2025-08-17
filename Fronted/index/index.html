@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="/style/styles.css">
   <script defer src="/js/app.js"></script>
   <script defer src="/js/registro-parqueo.js"></script>
-
+  <script defer src="/js/pagos.js"></script> <!-- Nuevo JS para pagos -->
 </head>
 
 <body>
@@ -24,8 +24,6 @@
         <li><a href="#" data-section="pagos">Pagos</a></li>
         <li><a href="#" data-section="usuarios">Usuarios</a></li>
         <li><a href="#" data-section="registro-parqueo">Registro de Parqueo</a></li>
-
-
       </ul>
     </aside>
 
@@ -163,9 +161,7 @@
         <p>Total tarifas: <span id="total-tarifas">0</span></p>
       </section>
 
-
       <!-- Espacios -->
-
       <section id="espacios" class="section-container">
         <h2 class="titulo">🎯 Panel de Control - Espacios de Parqueo</h2>
 
@@ -198,47 +194,63 @@
         </div>
 
         <h3>📍 Espacios Disponibles</h3>
-
         <div id="grid-espacios" class="espacios-grid">
           <!-- Espacios se insertan aquí con JS -->
         </div>
       </section>
 
+      <!-- Pagos -->
       <section id="pagos" class="section-container">
         <h2>💳 Gestión de Pagos</h2>
 
+        <!-- Formulario para realizar un pago -->
         <form id="form-pago">
-          <label>ID Registro: <input type="number" id="idRegistro" required></label>
-          <label>ID Usuario: <input type="number" id="idUsuario" required></label>
-          <label>Método de Pago:
+          <div class="form-group">
+            <label for="registroPago">Registro de Parqueo:</label>
+            <select id="registroPago" required></select>
+          </div>
+
+          <div class="form-group">
+            <label for="usuarioPago">Usuario que paga:</label>
+            <select id="usuarioPago" required></select>
+          </div>
+
+          <div class="form-group">
+            <label for="metodoPago">Método de Pago:</label>
             <select id="metodoPago" required>
               <option value="">-- Selecciona --</option>
-              <option value="Efectivo">Efectivo</option>
-              <option value="Tarjeta">Tarjeta</option>
-              <option value="Transferencia">Transferencia</option>
+              <option value="efectivo">Efectivo</option>
+              <option value="tarjeta">Tarjeta</option>
+              <option value="transferencia">Transferencia</option>
             </select>
-          </label>
-          <button type="submit">Realizar Pago</button>
+          </div>
+
+          <button type="submit" class="btn-submit">💵 Realizar Pago</button>
         </form>
 
         <hr>
 
-        <h3>📄 Pagos Realizados</h3>
-        <table>
+        <!-- Tabla para listar pagos -->
+        <h3>📋 Pagos Realizados</h3>
+        <table id="tabla-pagos">
           <thead>
             <tr>
               <th>ID</th>
+              <th>Placa Vehículo</th>
+              <th>Usuario</th>
               <th>Monto</th>
-              <th>Método</th>
-              <th>Fecha</th>
+              <th>Método Pago</th>
+              <th>Fecha Pago</th>
               <th>Acciones</th>
             </tr>
           </thead>
-          <tbody id="tabla-pagos"></tbody>
+          <tbody>
+            <!-- Pagos se insertan aquí con JS -->
+          </tbody>
         </table>
       </section>
 
-
+      <!-- Usuarios -->
       <section id="usuarios" class="section-container">
         <h2>👥 Gestión de Usuarios</h2>
 
@@ -275,41 +287,30 @@
           </thead>
           <tbody id="tabla-usuarios"></tbody>
         </table>
-
-
       </section>
 
-<!-- Registrar Entrada al Parqueadero -->
-<section id="registro-parqueo" class="section-container">
-  <h2>📥 Registrar Entrada al Parqueadero</h2>
-  <form id="form-registro-parqueo">
-  <label for="espacioEntrada">Espacio:</label>
-  <select id="espacioEntrada" required></select>
+      <!-- Registro de Parqueo -->
+      <section id="registro-parqueo" class="section-container">
+        <h2>📥 Registrar Entrada al Parqueadero</h2>
+        <form id="form-registro-parqueo">
+          <label for="espacioEntrada">Espacio:</label>
+          <select id="espacioEntrada" required></select>
 
-  <label for="tarifaEntrada">Tarifa:</label>
-  <select id="tarifaEntrada" required></select>
+          <label for="tarifaEntrada">Tarifa:</label>
+          <select id="tarifaEntrada" required></select>
 
-  <label for="usuarioEntrada">Usuario:</label>
-  <select id="usuarioEntrada" required></select>
+          <label for="placaEntrada">Placa del vehículo:</label>
+          <input type="text" id="placaEntrada" list="listaPlacas" autocomplete="off" required />
+          <datalist id="listaPlacas"></datalist>
 
- <label for="placaEntrada">Placa del vehículo:</label>
-<input type="text" id="placaEntrada" list="listaPlacas" autocomplete="off" required />
-<datalist id="listaPlacas"></datalist>
-
-
-  <button type="submit">Registrar</button>
-
-  <p id="mensajeEntrada"></p>
-</form>
-</section>
-
-
-
+          <button type="submit">Registrar</button>
+          <p id="mensajeEntrada"></p>
+        </form>
+      </section>
     </main>
   </div>
 
-
-
+  <!-- Modales para editar vehículos y tarifas -->
   <div id="modal-editar" class="modal hidden">
     <div class="modal-content">
       <h2>Editar Vehículo</h2>
@@ -358,16 +359,6 @@
       </form>
     </div>
   </div>
-
-
-
-
-
-
-
-
-
-
 
 </body>
 

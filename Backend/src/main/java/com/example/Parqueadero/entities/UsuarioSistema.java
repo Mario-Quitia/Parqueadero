@@ -30,8 +30,7 @@ public class UsuarioSistema {
     // Relaciones
    @JsonIgnore
 
-    @OneToMany(mappedBy = "usuarioRegistro")
-    private List<RegistroParqueo> registrosParqueo;
+  
 
     @OneToMany(mappedBy = "usuarioPago")
     private List<Pago> pagosRealizados;
@@ -98,13 +97,9 @@ public class UsuarioSistema {
         this.activo = activo;
     }
 
-    public List<RegistroParqueo> getRegistrosParqueo() {
-        return registrosParqueo;
-    }
 
-    public void setRegistrosParqueo(List<RegistroParqueo> registrosParqueo) {
-        this.registrosParqueo = registrosParqueo;
-    }
+
+ 
 
     public List<Pago> getPagosRealizados() {
         return pagosRealizados;
