@@ -1,5 +1,6 @@
 package com.example.Parqueadero.controllers;
 
+import com.example.Parqueadero.dto.RegistroParqueoDTO;
 import com.example.Parqueadero.entities.RegistroParqueo;
 import com.example.Parqueadero.service.RegistroParqueoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,22 +49,22 @@ public class RegistroParqueoController {
         return ResponseEntity.ok(registroParqueoService.listarTodos());
     }
 
-    // Listar registros activos (vehículos dentro)
-    @GetMapping("/activos")
-    public ResponseEntity<List<RegistroParqueo>> listarActivos() {
-        return ResponseEntity.ok(registroParqueoService.listarActivos());
-    }
 
-    // Listar registros por placa
-    @GetMapping("/placa/{placa}")
-    public ResponseEntity<List<RegistroParqueo>> listarPorPlaca(@PathVariable String placa) {
-        return ResponseEntity.ok(registroParqueoService.listarPorPlaca(placa));
-    }
-
-    // Eliminar registro
-    @DeleteMapping("/eliminar/{id}")
-    public ResponseEntity<Void> eliminarRegistro(@PathVariable Long id) {
-        registroParqueoService.eliminarRegistro(id);
-        return ResponseEntity.noContent().build();
-    }
+    @GetMapping("/listar-simple")
+public ResponseEntity<List<RegistroParqueoDTO>> listarTodosSimple() {
+    List<RegistroParqueoDTO> lista = registroParqueoService.listarTodos()
+            .stream()
+            .map(r -> new RegistroParqueoDTO(
+                    r.getVehiculo().getPlaca(),
+                    r.getHoraEntrada(),
+                    r.getHoraSalida()
+            ))
+            .toList();
+    return ResponseEntity.ok(lista);
+}
+    
+    
+    
+    
+    
 }

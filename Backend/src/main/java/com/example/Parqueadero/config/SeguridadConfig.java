@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 @Configuration
 public class SeguridadConfig {
@@ -20,14 +22,20 @@ public class SeguridadConfig {
 
         return http.build();
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+    // Evitar error creando un UserDetailsManager vacío
+    @Bean
+    public UserDetailsManager userDetailsManager() {
+        return new InMemoryUserDetailsManager();
+    }
 }
+
+    
+    
+    
+    
+    
+    
+    
+    
+

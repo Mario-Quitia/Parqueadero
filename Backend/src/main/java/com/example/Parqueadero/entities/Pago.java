@@ -26,17 +26,14 @@ public class Pago {
     @Enumerated(EnumType.STRING)
   private MetodoPago metodoPago;
 
-    @ManyToOne
-    @JoinColumn(name = "usuario_pago_id", nullable = false)
-    private UsuarioSistema usuarioPago;
+    
 
     public Pago() {}
 
-    public Pago(RegistroParqueo registroParqueo, LocalDateTime fechaPago, Double monto, String metodoPago, UsuarioSistema usuarioPago) {
+    public Pago(RegistroParqueo registroParqueo, LocalDateTime fechaPago, Double monto, String metodoPago ) {
         this.registroParqueo = registroParqueo;
         this.fechaPago = fechaPago;
         this.monto = monto;
-        this.usuarioPago = usuarioPago;
     }
 
     public Long getId() { return id; }
@@ -52,8 +49,6 @@ public class Pago {
     public void setMonto(Double monto) { this.monto = monto; }
 
 
-    public UsuarioSistema getUsuarioPago() { return usuarioPago; }
-    public void setUsuarioPago(UsuarioSistema usuarioPago) { this.usuarioPago = usuarioPago; }
 
     public MetodoPago getMetodoPago() {
         return metodoPago;

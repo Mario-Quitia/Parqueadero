@@ -45,7 +45,7 @@ public class RegistroParqueo {
     public RegistroParqueo() {}
 
     // Constructor con atributos clave
-    public RegistroParqueo(Vehiculo vehiculo, LocalDateTime horaEntrada, EspacioParqueo espacioParqueo, Tarifa tarifa, UsuarioSistema usuarioRegistro) {
+    public RegistroParqueo(Vehiculo vehiculo, LocalDateTime horaEntrada, EspacioParqueo espacioParqueo, Tarifa tarifa) {
         this.vehiculo = vehiculo;
         this.horaEntrada = horaEntrada;
         this.espacioParqueo = espacioParqueo;

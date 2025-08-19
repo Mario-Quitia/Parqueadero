@@ -16,9 +16,6 @@ public interface RegistroParqueoService {
 
     List<RegistroParqueo> listarTodos();
 
-    List<RegistroParqueo> listarActivos();
+  
 
-    List<RegistroParqueo> listarPorPlaca(String placa);
-
-    void eliminarRegistro(Long id);
 }

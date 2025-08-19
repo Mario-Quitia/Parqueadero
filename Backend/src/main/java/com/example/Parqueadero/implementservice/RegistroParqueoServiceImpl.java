@@ -43,33 +43,32 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
         logger.info("===> Iniciando creación de registro de parqueo...");
 
         if (registro.getVehiculo() == null || registro.getVehiculo().getPlaca() == null) {
-            throw new RuntimeException("Vehículo o placa no proporcionados.");
+            throw new IllegalArgumentException("Vehículo o placa no proporcionados.");
         }
 
         String placa = registro.getVehiculo().getPlaca();
         logger.info("===> Placa recibida: {}", placa);
 
-        // 🔐 VALIDACIÓN: ¿Ya hay un registro activo para esta placa?
-        Optional<RegistroParqueo> registroActivo = registroParqueoRepository.findByVehiculo_PlacaAndHoraSalidaIsNull(placa);
+        // Validación: ¿Ya hay un registro activo para esta placa?
+        Optional<RegistroParqueo> registroActivo =
+                registroParqueoRepository.findByVehiculo_PlacaAndHoraSalidaIsNull(placa);
+
         if (registroActivo.isPresent()) {
-            throw new RuntimeException("Este vehículo ya tiene un registro activo. No puede ingresar nuevamente.");
+            throw new IllegalStateException("Este vehículo ya tiene un registro activo. No puede ingresar nuevamente.");
         }
 
         Vehiculo vehiculo = vehiculoRepository.findById(placa)
-                .orElseThrow(() -> new RuntimeException("Vehículo no encontrado con placa: " + placa));
+                .orElseThrow(() -> new IllegalArgumentException("Vehículo no encontrado con placa: " + placa));
 
         registro.setVehiculo(vehiculo);
         logger.info("===> Vehículo encontrado: {}", vehiculo.getTipo());
 
-        // 🚫 Se elimina la validación de usuario obligatorio
-        // Si en el futuro se maneja autenticación, aquí se podrá setear el usuario logueado
-
-        String tipoVehiculo = vehiculo.getTipo();
-        logger.info("===> Buscando espacio para tipo: {}", tipoVehiculo);
-
+        // Buscar espacio disponible
         EspacioParqueo espacioDisponible = espacioParqueoRepository
-                .findFirstByTipoAndEstado(tipoVehiculo, "LIBRE")
-                .orElseThrow(() -> new RuntimeException("No hay espacios disponibles para tipo: " + tipoVehiculo));
+                .findFirstByTipoAndEstado(vehiculo.getTipo(), "LIBRE")
+                .orElseThrow(() -> new IllegalStateException(
+                        "No hay espacios disponibles para tipo: " + vehiculo.getTipo()
+                ));
 
         espacioDisponible.setEstado("OCUPADO");
         espacioParqueoRepository.save(espacioDisponible);
@@ -91,10 +90,10 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
         logger.info("===> Cerrando registro con ID: {}", id);
 
         RegistroParqueo registro = registroParqueoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Registro no encontrado con id: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Registro no encontrado con id: " + id));
 
         if (registro.getHoraSalida() != null) {
-            throw new RuntimeException("Este registro ya fue cerrado.");
+            throw new IllegalStateException("Este registro ya fue cerrado.");
         }
 
         LocalDateTime salida = (horaSalida != null) ? horaSalida : LocalDateTime.now();
@@ -104,15 +103,16 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
         logger.info("===> Tipo de tarifa: {}", tipo);
         logger.info("===> Duración calculada (minutos): {}", duracion.toMinutes());
 
+        // Validaciones de tiempo mínimo según tarifa
         switch (tipo) {
             case DIA -> {
                 if (duracion.toHours() < 24) {
-                    throw new RuntimeException("No puede cerrar el registro antes de 24 horas para tarifa diaria.");
+                    throw new IllegalStateException("No puede cerrar el registro antes de 24 horas para tarifa diaria.");
                 }
             }
             case MES -> {
                 if (duracion.toDays() < 30) {
-                    throw new RuntimeException("No puede cerrar el registro antes de 30 días para tarifa mensual.");
+                    throw new IllegalStateException("No puede cerrar el registro antes de 30 días para tarifa mensual.");
                 }
             }
             default -> {}
@@ -120,23 +120,25 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
 
         registro.setHoraSalida(salida);
 
+        // Cálculo del total a pagar
         long minutos = duracion.toMinutes();
         double total = switch (tipo) {
             case HORA -> Math.ceil(minutos / 60.0) * registro.getTarifa().getValorHora().doubleValue();
             case DIA -> {
-                long dias = duracion.toDays();
-                yield registro.getTarifa().getValor() * (dias == 0 ? 1 : dias);
+                long dias = Math.max(1, duracion.toDays());
+                yield registro.getTarifa().getValor() * dias;
             }
             case MES -> {
                 long diasTotal = duracion.toDays();
-                long meses = (long) Math.ceil(diasTotal / 30.0);
-                yield registro.getTarifa().getValor() * (meses == 0 ? 1 : meses);
+                long meses = Math.max(1, (long) Math.ceil(diasTotal / 30.0));
+                yield registro.getTarifa().getValor() * meses;
             }
         };
 
         registro.setTotalPagado(total);
         logger.info("===> Total a pagar calculado: {}", total);
 
+        // Liberar espacio
         EspacioParqueo espacio = registro.getEspacioParqueo();
         espacio.setEstado("LIBRE");
         espacioParqueoRepository.save(espacio);
@@ -160,21 +162,7 @@ public class RegistroParqueoServiceImpl implements RegistroParqueoService {
         return registroParqueoRepository.findAll();
     }
 
-    @Override
-    public List<RegistroParqueo> listarActivos() {
-        logger.info("===> Listando registros activos (sin hora de salida)");
-        return registroParqueoRepository.findByHoraSalidaIsNull();
-    }
 
-    @Override
-    public List<RegistroParqueo> listarPorPlaca(String placa) {
-        logger.info("===> Listando registros por placa: {}", placa);
-        return registroParqueoRepository.findByVehiculo_Placa(placa);
-    }
 
-    @Override
-    public void eliminarRegistro(Long id) {
-        logger.info("===> Eliminando registro con ID: {}", id);
-        registroParqueoRepository.deleteById(id);
-    }
+   
 }
